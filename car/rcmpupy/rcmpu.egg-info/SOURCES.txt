@@ -1,0 +1,12 @@
+MANIFEST.in
+README.rst
+setup.cfg
+setup.py
+rcmpu.egg-info/PKG-INFO
+rcmpu.egg-info/SOURCES.txt
+rcmpu.egg-info/dependency_links.txt
+rcmpu.egg-info/top_level.txt
+rcmpupy/__init__.py
+src/_mpu9250.c
+test/__init__.py
+test/test_mpu9250.py

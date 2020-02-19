@@ -1,0 +1,25 @@
+<annotation>
+	<folder>n04409515</folder>
+	<filename>n04409515_7053</filename>
+	<source>
+		<database>ImageNet database</database>
+	</source>
+	<size>
+		<width>500</width>
+		<height>500</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>n04409515</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>41</xmin>
+			<ymin>41</ymin>
+			<xmax>457</xmax>
+			<ymax>455</ymax>
+		</bndbox>
+	</object>
+</annotation>
