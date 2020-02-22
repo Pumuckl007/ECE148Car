@@ -78,27 +78,32 @@ class PersonFinder():
         people = []
         id = 1
 
+        minDist = 1000
+        throttle = 0
         # draw the final bounding boxes
         for (xA, yA, xB, yB) in pick:
             dist = self.computeDistance(xA, yA, xB, yB)
             angle = self.computeAngle(xA, yA, xB, yB)
-            self.steering_cmd = angle = angle / self.steering_max_angle
+            if dist < minDist :
+                minDist = dist
+                throttle = 0.05
+                self.steering_cmd = angle = angle / self.steering_max_angle
 
-        self.out = (self.steering_cmd, 0)
+        self.out = (self.steering_cmd, throttle)
         print("Steering at " + str(self.steering_cmd))
 
     def update(self):
         # the function run in it's own thread
         while True:
             if(self.needsCalc):
-                self.out = self.run(self.image)
+                self.run(self.image)
             else:
                 time.sleep(0.01)
 
     def run_threaded(self, image):
         self.image = image;
         self.needsCalc = True
-        return self.out
+        return self.out[0], self.out[1]
 
     def shutdown(self):
         return
