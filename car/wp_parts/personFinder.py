@@ -52,7 +52,8 @@ class PersonFinder():
     def drawOnImage(self, img, dist, angle, id=0):
         # x = dist * math.sin(angle*3.14/180) * 300/5 + 200
         # y = 300 - (dist * math.cos(angle*3.14/180) * 300/5)
-        x = angle*200/50 + 200
+        # x = angle*200/50 + 200
+        x = int(angle*200/50 + 200)
         cv2.rectangle(img, (x-2, 0), (x+2, 300), (0, 0, 255), 2)
 
         # cv2.ellipse(img, (int(x), int(y)), (60, 60), 0.0, 0.0, 360.0, (255, 1-id/3, id/3), -1)
@@ -66,7 +67,7 @@ class PersonFinder():
         # print(str(image))
         image = image.transpose([1, 0, 2])
         image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
-        image = imutils.resize(image, width=min(400, 300))
+        image = imutils.resize(image, width=400)
         # detect people in the image
         # (rects, weights) = hog.detectMultiScale(image, winStride=(4, 4),
         # 	padding=(8, 8), scale=1.05)
@@ -93,6 +94,7 @@ class PersonFinder():
             cv2.rectangle(image, (xA, yA), (xB, yB), (0, 255, 0), 2)
             dist = self.computeDistance(xA, yA, xB, yB)
             angle = self.computeAngle(xA, yA, xB, yB)
+            self.drawOnImage(image, dist, angle)
             if dist < minDist :
                 minDist = dist
                 throttle = 0.07
