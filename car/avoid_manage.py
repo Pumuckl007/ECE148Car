@@ -52,25 +52,25 @@ def drive():
 
     V.add(cam, inputs=[], outputs=['cam/img'], threaded=True)
 
-    V.add(ctr,
-          inputs=['cam/img'],
-          outputs=['user/angle', 'user/throttle', 'user/mode', 'recording'],
-          threaded=True)
-
-    print("You can now go to <your pis hostname.local>:8887 to view your car's camera.")
-
     # add planner, actuator parts
     # Previous location is no longer needed
     # Instead, use actual bearing from DMP
     # It also takes in stop_cmd, a boolean indicating whether to stop
     # in which case it reverts to "STOPPED_PWM"
     V.add(planner, inputs=["cam/img"],
-            outputs=["steer_cmd", "throttle_cmd"], threaded=True)
+            outputs=["steer_cmd", "throttle_cmd", "proc/img"], threaded=True)
 
     #steer_cmd is a pwm value
     V.add(steering, inputs=['steer_cmd'])
     # throttle takes in a throttle_cmd pwm value,
     V.add(throttle, inputs=['throttle_cmd'])
+
+    V.add(ctr,
+          inputs=['proc/img'],
+          outputs=['user/angle', 'user/throttle', 'user/mode', 'recording'],
+          threaded=True)
+
+    print("You can now go to <your pis hostname.local>:8887 to view your car's camera.")
 
     V.start()
 

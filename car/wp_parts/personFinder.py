@@ -31,7 +31,7 @@ class PersonFinder():
         self.hog = cv2.HOGDescriptor()
         self.hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
 
-        self.out = (0, 0)
+        self.out = (0, 0, 0)
         self.needsCalc = False
 
     def computeDistance(self, xA, yA, xB, yB):
@@ -48,6 +48,11 @@ class PersonFinder():
         angle = xCent * 50/200
         print("Found person at " + str(angle) + " degreese")
         return angle
+
+    def drawOnImage(img, dist, angle, id=0):
+        x = dist * math.sin(angle*3.14/180) * 300/5 + 200
+        y = 300 - (dist * math.cos(angle*3.14/180) * 300/5)
+        cv2.ellipse(img, (int(x), int(y)), (60, 60), 0.0, 0.0, 360.0, (255, 1-id/3, id/3), -1)
 
     def run(self, frame):
         self.needsCalc = False
@@ -84,12 +89,14 @@ class PersonFinder():
         for (xA, yA, xB, yB) in pick:
             dist = self.computeDistance(xA, yA, xB, yB)
             angle = self.computeAngle(xA, yA, xB, yB)
+            self.drawOnImage(draw, dist, angle, id)
             if dist < minDist :
                 minDist = dist
                 throttle = 0.07
                 self.steering_cmd = angle = angle / self.steering_max_angle
 
-        self.out = (self.steering_cmd, throttle)
+        imageOut = image.transpose([1, 0, 2])
+        self.out = (self.steering_cmd, throttle, imageOut)
         print("Steering at " + str(self.steering_cmd))
 
     def update(self):
@@ -103,7 +110,7 @@ class PersonFinder():
     def run_threaded(self, image):
         self.image = image;
         self.needsCalc = True
-        return self.out[0], self.out[1]
+        return self.out[0], self.out[1], self.out[2]
 
     def shutdown(self):
         return
