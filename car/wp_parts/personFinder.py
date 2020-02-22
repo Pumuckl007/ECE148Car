@@ -62,8 +62,8 @@ class PersonFinder():
         image = self.image
         # print(str(image))
         image = image.transpose([1, 0, 2])
-        image = imutils.resize(image, width=min(400, 300))
         image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
+        image = imutils.resize(image, width=min(400, 300))
         # detect people in the image
         # (rects, weights) = hog.detectMultiScale(image, winStride=(4, 4),
         # 	padding=(8, 8), scale=1.05)
