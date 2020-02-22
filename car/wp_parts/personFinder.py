@@ -78,8 +78,6 @@ class PersonFinder():
         people = []
         id = 1
 
-        self.steer_cmd = 0
-
         # draw the final bounding boxes
         for (xA, yA, xB, yB) in pick:
             dist = self.computeDistance(xA, yA, xB, yB)
