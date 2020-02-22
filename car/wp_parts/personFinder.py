@@ -63,7 +63,7 @@ class PersonFinder():
         # print(str(image))
         image = image.transpose([1, 0, 2])
         image = imutils.resize(image, width=min(400, 300))
-
+        image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
         # detect people in the image
         # (rects, weights) = hog.detectMultiScale(image, winStride=(4, 4),
         # 	padding=(8, 8), scale=1.05)
@@ -95,6 +95,7 @@ class PersonFinder():
                 throttle = 0.07
                 self.steering_cmd = angle = angle / self.steering_max_angle
 
+        image = cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
         imageOut = image.transpose([1, 0, 2])
         self.out = (self.steering_cmd, throttle, imageOut)
         print("Steering at " + str(self.steering_cmd))
