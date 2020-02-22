@@ -50,9 +50,12 @@ class PersonFinder():
         return angle
 
     def drawOnImage(self, img, dist, angle, id=0):
-        x = dist * math.sin(angle*3.14/180) * 300/5 + 200
-        y = 300 - (dist * math.cos(angle*3.14/180) * 300/5)
-        cv2.ellipse(img, (int(x), int(y)), (60, 60), 0.0, 0.0, 360.0, (255, 1-id/3, id/3), -1)
+        # x = dist * math.sin(angle*3.14/180) * 300/5 + 200
+        # y = 300 - (dist * math.cos(angle*3.14/180) * 300/5)
+        x = angle*200/50 + 200
+        cv2.rectangle(img, (x-2, 0), (x+2, 300), (0, 0, 255), 2)
+
+        # cv2.ellipse(img, (int(x), int(y)), (60, 60), 0.0, 0.0, 360.0, (255, 1-id/3, id/3), -1)
 
     def run(self, frame):
         self.needsCalc = False
