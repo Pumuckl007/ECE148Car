@@ -14,6 +14,7 @@ import donkeycar as dk
 from wp_parts.personFinder import PersonFinder
 from donkeycar.vehicle import Vehicle
 from donkeycar.parts.actuator import PCA9685, PWMSteering, PWMThrottle
+from donkeycar.parts.controller import LocalWebController
 
 # other important modules
 import time
