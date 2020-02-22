@@ -28,6 +28,8 @@ def drive():
     # initialize vehicle
     V = Vehicle()
 
+    ctr = LocalWebController()
+
     # Planner is a DK part that calculates control signals to actuators based on current location
     # from GPS
     planner = PersonFinder(steer_gain=0.5, distance_calibration=466)
@@ -49,6 +51,12 @@ def drive():
 
     V.add(cam, inputs=[], outputs=['cam/img'], threaded=True)
 
+    V.add(ctr,
+          inputs=['cam/img'],
+          outputs=['user/angle', 'user/throttle', 'user/mode', 'recording'],
+          threaded=True)
+
+    print("You can now go to <your pis hostname.local>:8887 to view your car's camera.")
 
     # add planner, actuator parts
     # Previous location is no longer needed

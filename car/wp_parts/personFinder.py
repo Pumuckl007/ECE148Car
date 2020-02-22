@@ -86,7 +86,7 @@ class PersonFinder():
             angle = self.computeAngle(xA, yA, xB, yB)
             if dist < minDist :
                 minDist = dist
-                throttle = 0.05
+                throttle = 0.07
                 self.steering_cmd = angle = angle / self.steering_max_angle
 
         self.out = (self.steering_cmd, throttle)
