@@ -49,7 +49,7 @@ class PersonFinder():
         print("Found person at " + str(angle) + " degreese")
         return angle
 
-    def drawOnImage(img, dist, angle, id=0):
+    def drawOnImage(self, img, dist, angle, id=0):
         x = dist * math.sin(angle*3.14/180) * 300/5 + 200
         y = 300 - (dist * math.cos(angle*3.14/180) * 300/5)
         cv2.ellipse(img, (int(x), int(y)), (60, 60), 0.0, 0.0, 360.0, (255, 1-id/3, id/3), -1)
@@ -87,9 +87,9 @@ class PersonFinder():
         throttle = 0
         # draw the final bounding boxes
         for (xA, yA, xB, yB) in pick:
+            cv2.rectangle(image, (xA, yA), (xB, yB), (0, 255, 0), 2)
             dist = self.computeDistance(xA, yA, xB, yB)
             angle = self.computeAngle(xA, yA, xB, yB)
-            self.drawOnImage(draw, dist, angle, id)
             if dist < minDist :
                 minDist = dist
                 throttle = 0.07
