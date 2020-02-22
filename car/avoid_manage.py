@@ -16,8 +16,6 @@ from donkeycar.vehicle import Vehicle
 from donkeycar.parts.actuator import PCA9685, PWMSteering, PWMThrottle
 
 # other important modules
-import serial
-import pynmea2
 import time
 import threading
 
@@ -35,21 +33,21 @@ def drive():
     planner = PersonFinder(steer_gain=0.5, distance_calibration=466)
 
     # Actuators: steering and throttle
-    steering_controller = PCA9685(cfg.STEERING_CHANNEL)
+    steering_controller = PCA9685(1, 0x40, busnum=1)
     steering = PWMSteering(controller=steering_controller,
-                                    left_pulse=cfg.STEERING_LEFT_PWM,
-                                    right_pulse=cfg.STEERING_RIGHT_PWM)
+                                    left_pulse=300,
+                                    right_pulse=475)
 
-    throttle_controller = PCA9685(cfg.THROTTLE_CHANNEL)
+    throttle_controller = PCA9685(2, 0x40, busnum=1)
     throttle = PWMThrottle(controller=throttle_controller,
-                                    max_pulse=cfg.THROTTLE_FORWARD_PWM,
-                                    zero_pulse=cfg.THROTTLE_STOPPED_PWM,
-                                    min_pulse=cfg.THROTTLE_REVERSE_PWM)
+                                    max_pulse=460,
+                                    zero_pulse=370,
+                                    min_pulse=330)
 
     from donkeycar.parts.camera import Webcam
     cam = Webcam(image_w=400, image_h=300, image_d=3)
 
-    V.add(cam, inputs=[], outputs=['cam/img'], threaded=threaded)
+    V.add(cam, inputs=[], outputs=['cam/img'], threaded=True)
 
 
     # add planner, actuator parts
@@ -58,7 +56,7 @@ def drive():
     # It also takes in stop_cmd, a boolean indicating whether to stop
     # in which case it reverts to "STOPPED_PWM"
     V.add(planner, inputs=["cam/img"],
-            outputs=["steer_cmd", "throttle_cmd"])
+            outputs=["steer_cmd", "throttle_cmd"], threaded=True)
 
     #steer_cmd is a pwm value
     V.add(steering, inputs=['steer_cmd'])

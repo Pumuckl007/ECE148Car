@@ -7,9 +7,8 @@ donkeycar part for controlling the car.
 @authors: Jason Mayeda, Sidney Hsu, Roy Sun, Matthew Gilli
 """
 
-from numpy import pi, cos, sin, arctan2, sqrt, square, radians
-import time
 from __future__ import print_function
+from numpy import pi, cos, sin, arctan2, sqrt, square, radians
 from imutils.object_detection import non_max_suppression
 from imutils import paths
 import numpy as np
@@ -17,6 +16,7 @@ import argparse
 import imutils
 import cv2
 import math
+import time
 
 class PersonFinder():
     def __init__(self, steer_gain, distance_calibration):
@@ -32,15 +32,16 @@ class PersonFinder():
         self.hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
 
         self.out = (0, 0)
+        self.needsCalc = False
 
-    def computeDistance(xA, yA, xB, yB):
+    def computeDistance(self, xA, yA, xB, yB):
         h = abs(yA - yB)
         w = abs(xA - xB)
-        dist = 1/h * calibration
+        dist = 1/h * self.distance_calibration
         print("Found person " + str(dist) + " meters away")
         return dist
 
-    def computeAngle(xA, yA, xB, yB):
+    def computeAngle(self, xA, yA, xB, yB):
         xCent = xA + xB
         xCent = xCent / 2
         xCent = xCent - 200
@@ -50,15 +51,18 @@ class PersonFinder():
 
     def run(self, frame):
         self.needsCalc = False
+        if not hasattr(self, 'image') or self.image is None:
+                return
         # Capture frame-by-frame
-
-        image = imutils.resize(self.image, width=min(400, frame.shape[1]))
+        image = self.image
+        # print(str(image))
+        image = image.transpose([1, 0, 2])
+        image = imutils.resize(image, width=min(400, 300))
 
         # detect people in the image
         # (rects, weights) = hog.detectMultiScale(image, winStride=(4, 4),
         # 	padding=(8, 8), scale=1.05)
-        (rects, weights) = hog.detectMultiScale(image, winStride=(4, 4),
-        	padding=(8, 8), scale=1.05)
+        (rects, weights) = self.hog.detectMultiScale(image, winStride=(4, 4), padding=(8, 8), scale=1.05)
 
         # draw the original bounding boxes
         for (x, y, w, h) in rects:
@@ -78,18 +82,18 @@ class PersonFinder():
 
         # draw the final bounding boxes
         for (xA, yA, xB, yB) in pick:
-            dist = computeDistance(xA, yA, xB, yB)
-            angle = computeAngle(xA, yA, xB, yB)
+            dist = self.computeDistance(xA, yA, xB, yB)
+            angle = self.computeAngle(xA, yA, xB, yB)
             self.steer_cmd = angle = angle / self.steering_max_angle
 
-
-        return self.steer_cmd, 0.1
+        self.out = (self.steer_cmd, 0)
+        print("Steering at " + str(self.steer_cmd))
 
     def update(self):
         # the function run in it's own thread
         while True:
             if(self.needsCalc):
-                self.out = self.run(self.in)
+                self.out = self.run(self.image)
             else:
                 time.sleep(0.01)
 
