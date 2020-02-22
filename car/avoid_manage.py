@@ -11,10 +11,7 @@ Call: gps_manage.py -drive
 
 # import GPS Planner and other DK parts
 import donkeycar as dk
-from wp_parts.gps import GPS
-from wp_parts.ultrasonic import HCSR04
-from wp_parts.dmp import MPU9265
-from wp_parts.planner import KiwiPlanner
+from wp_parts.personFinder import PersonFinder
 from donkeycar.vehicle import Vehicle
 from donkeycar.parts.actuator import PCA9685, PWMSteering, PWMThrottle
 
