@@ -82,10 +82,10 @@ class PersonFinder():
         for (xA, yA, xB, yB) in pick:
             dist = self.computeDistance(xA, yA, xB, yB)
             angle = self.computeAngle(xA, yA, xB, yB)
-            self.steer_cmd = angle = angle / self.steering_max_angle
+            self.steering_cmd = angle = angle / self.steering_max_angle
 
-        self.out = (self.steer_cmd, 0)
-        print("Steering at " + str(self.steer_cmd))
+        self.out = (self.steering_cmd, 0)
+        print("Steering at " + str(self.steering_cmd))
 
     def update(self):
         # the function run in it's own thread
