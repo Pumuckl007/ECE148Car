@@ -22,7 +22,7 @@ class PersonFinder():
     def __init__(self, steer_gain, distance_calibration):
 
         self.steer_gain = steer_gain           # TODO: add PID steering controller
-        self.steering_max_angle = 100                # calibrate with DK actuator parts inputs
+        self.steering_max_angle = 50                # calibrate with DK actuator parts inputs
         self.steering_cmd = 0                  # steer command to send to servos
         self.bearing = 0                       # current bearing error to goal [rad]
 
@@ -103,7 +103,7 @@ class PersonFinder():
 
         image = cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
         imageOut = image.transpose([1, 0, 2])
-        self.out = (self.steering_cmd, self.throttle, imageOut)
+        self.out = (self.steering_cmd, 0.08, imageOut)
         print("Steering at " + str(self.steering_cmd))
 
     def update(self):
