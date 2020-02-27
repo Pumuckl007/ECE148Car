@@ -2,18 +2,69 @@ import serial
 import pynmea2
 import ubx
 
+class UBXMidigatorReader:
+    def __init__(self, ser, callback):
+        self.ser = ser
+        self.callback = callback
+        self.buffer = b''
+
+    def read(self, n=1):
+        nextChars = self.ser.read(n)
+        nextCharsDup = [nextChars[i:i+1] for i in range(len(nextChars))]
+        success = False
+        for char in nextCharsDup:
+            if char == b'\n':
+                success = self.callback(self.buffer)
+                self.buffer = b''
+            else :
+                self.buffer = self.buffer + char
+        return nextChars
+
+
+
 class C099F9P:
     def __init__(self,port='/dev/ttyACM0'):
         self.ser = serial.Serial(port=port, baudrate=460800)
+        self.mediator = UBXMidigatorReader(self.ser, self.parseNmea)
+        self.reader = ubx.Reader(self.mediator.read)
+
+    def setUpdateRate(self):
+        print(ubx.descriptions.cfg_rate)
+        msg = ubx.Message(ubx.descriptions.cfg_rate.description, {'measRate':100, 'navRate':0x01, 'timeRef': 0x01})
+        s = msg.serialize();
+        print(":".join("{:02x}".format(c) for c in s))
+        self.ser.write(s)
 
     def read(self):
-        data = self.ser.readline()
         try:
-            msg = pynmea2.parse(data.decode())
-            self.readNmea(msg)
-        except ParseError:
+            rawmessage = self.reader.read_rawmessage()
+            self.parseRaw(rawmessage)
+        except ubx.ChecksumError:
             print("Unable to parse")
-            print(data)
+
+    def parseRaw(self, raw):
+        try:
+            message = ubx.default_parser.parse(raw)
+        except KeyError:
+            print("No idea of the key")
+        except ubx.PayloadError:
+            print("Bad payload")
+        else:
+            print(message)
+
+    def parseNmea(self, rawNmea):
+        success = True
+        try:
+            nmea = pynmea2.parse(rawNmea.decode())
+            self.readNmea(nmea)
+        except pynmea2.ParseError:
+            success = False
+            print("Not nema!")
+            print(rawNmea)
+        except UnicodeDecodeError:
+            success = False
+            print("Not nmea!")
+        return success
 
     def readNmea(self, nmea):
         if not nmea.sentence_type == "GGA":
@@ -39,7 +90,10 @@ def lookAtNema(nmea):
 
 def read():
     gps = C099F9P()
+    gps.setUpdateRate()
+    # return
     while (True):
         gps.read()
+        print("Read")
 
 read()
