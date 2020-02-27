@@ -1,0 +1,10 @@
+diff --git a/ubx/__init__.py b/ubx/__init__.py
+index 881dd7f..2478a53 100644
+--- a/ubx/__init__.py
++++ b/ubx/__init__.py
+@@ -25,4 +25,4 @@ from .statistics import Statistics
+ 
+ default_parser = Parser(*descriptions.default)
+ 
+-from . import printing
++# from .printing import rst
