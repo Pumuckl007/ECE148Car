@@ -1,6 +1,7 @@
 import serial
 import pynmea2
 import ubx
+from NTRIPClient import NTRIPClient
 
 class UBXMidigatorReader:
     def __init__(self, ser, callback):
