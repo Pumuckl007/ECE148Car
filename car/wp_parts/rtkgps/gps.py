@@ -23,16 +23,21 @@ class UBXMidigatorReader:
                 self.buffer = self.buffer + char
         return nextChars
 
-
+def stub:
+    nothing = ""
 
 class C099F9P:
     def __init__(self,port='/dev/ttyACM0', ip="rtk2go.com", rtkport=2101, mountpoint="ESCADERA_NTRIP"):
-        self.ntrip = NTRIPClient(ip, rtkport, mountpoint, self.newRTK)
         self.ser = serial.Serial(port=port, baudrate=460800)
-        self.mediator = UBXMidigatorReader(self.ser, self.parseNmea, self.ntrip.querry)
+        self.ip = ip
+        if not ip=="":
+            self.ntrip = NTRIPClient(ip, rtkport, mountpoint, self.newRTK)
+            self.ntrip.getMountPoints()
+            self.ntrip.startStreamingData()
+            self.mediator = UBXMidigatorReader(self.ser, self.parseNmea, self.ntrip.querry)
+        else:
+            self.mediator = UBXMidigatorReader(self.ser, self.parseNmea, stub)
         self.reader = ubx.Reader(self.mediator.read)
-        self.ntrip.getMountPoints()
-        self.ntrip.startStreamingData()
         self.newGGA = False
 
     def newRTK(self, data):
@@ -86,7 +91,8 @@ class C099F9P:
         # print("at " + str(lat) + nmea.lat_dir + ", " + str(lon) + nmea.lon_dir + " with " + nmea.num_sats + " sats.")
         self.newGGA = True
         self.gga = str(str(nmea).replace("GNGGA", "GPGGA"))
-        self.ntrip.gga = self.gga
+        if not self.ip == "":
+            self.ntrip.gga = self.gga
 
     def convertLatLon(self, latLon):
         decimalIdx = latLon.index('.') - 2
