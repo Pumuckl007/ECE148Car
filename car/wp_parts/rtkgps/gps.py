@@ -33,6 +33,7 @@ class C099F9P:
         self.reader = ubx.Reader(self.mediator.read)
         self.ntrip.getMountPoints()
         self.ntrip.startStreamingData()
+        self.newGGA = False
 
     def newRTK(self, data):
         print(str(len(data)) + " bytes of rtk read")
@@ -40,7 +41,7 @@ class C099F9P:
 
     def setUpdateRate(self):
         print(ubx.descriptions.cfg_rate)
-        msg = ubx.Message(ubx.descriptions.cfg_rate.description, {'measRate':1000, 'navRate':0x01, 'timeRef': 0x01})
+        msg = ubx.Message(ubx.descriptions.cfg_rate.description, {'measRate':51, 'navRate':0x01, 'timeRef': 0x01})
         s = msg.serialize();
         print(":".join("{:02x}".format(c) for c in s))
         self.ser.write(s)
@@ -82,7 +83,10 @@ class C099F9P:
         print(str(nmea).replace("GNGGA", "GPGGA"))
         lat = self.convertLatLon(nmea.lat)
         lon = self.convertLatLon(nmea.lon)
-        print("at " + str(lat) + nmea.lat_dir + ", " + str(lon) + nmea.lon_dir + " with " + nmea.num_sats + " sats.")
+        # print("at " + str(lat) + nmea.lat_dir + ", " + str(lon) + nmea.lon_dir + " with " + nmea.num_sats + " sats.")
+        self.newGGA = True
+        self.gga = str(str(nmea).replace("GNGGA", "GPGGA"))
+        self.ntrip.gga = self.gga
 
     def convertLatLon(self, latLon):
         decimalIdx = latLon.index('.') - 2
@@ -110,4 +114,5 @@ def read():
         gps.read()
         print("Read")
 
-read()
+if __name__ == '__main__':
+    read()
