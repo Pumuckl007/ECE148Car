@@ -64,6 +64,8 @@ def drive(cfg, goalLocation):
                                     zero_pulse=cfg.THROTTLE_STOPPED_PWM,
                                     min_pulse=cfg.THROTTLE_REVERSE_PWM)
 
+    mixer = Mixer()
+
     from donkeycar.parts.camera import Webcam
     cam = Webcam(image_w=400, image_h=300, image_d=3)
 
@@ -74,20 +76,23 @@ def drive(cfg, goalLocation):
 
     # add threaded part for gps controller
     # We no longer need the GPS to output previous location
-    V.add(gps, outputs=["currLocation"], threaded=True)
+    V.add(gps, outputs=["currLocation", "prevLocation"], threaded=True)
 
     # add planner, actuator parts
     # Previous location is no longer needed
     # Instead, use actual bearing from DMP
     # It also takes in stop_cmd, a boolean indicating whether to stop
     # in which case it reverts to "STOPPED_PWM"
-    V.add(planner, inputs=["currLocation", "bearing", "stop_cmd"],
-            outputs=["steer_cmd", "throttle_cmd"])
+    V.add(planner, inputs=["currLocation", "prevLocation"],
+            outputs=["steer_cmd_planner", "throttle_cmd_planner"])
+
+    V.add(mixer, inputs=["steer_cmd_person", "steer_cmd_planner"],
+            outputs=["steer_cmd"])
 
     #steer_cmd is a pwm value
     V.add(steering, inputs=['steer_cmd'])
     # throttle takes in a throttle_cmd pwm value,
-    V.add(throttle, inputs=['throttle_cmd'])
+    V.add(throttle, inputs=['throttle_cmd_person'])
 
     V.add(ctr,
           inputs=['proc/img'],

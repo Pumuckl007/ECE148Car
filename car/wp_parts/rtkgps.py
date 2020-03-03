@@ -17,6 +17,7 @@ class RTKGPS():
     def __init__(self):
         # GPS coordinates used for controller
         self.currLocation = [0, 0]
+        self.prevLocation = [0, 0]
 
         # GPS serial object
         self.gpsObj = C099F9P()
@@ -42,7 +43,7 @@ class RTKGPS():
             self.poll()
 
     def run_threaded(self):
-        return self.currLocation
+        return (self.currLocation, self.prevLocation)
 
     def shutdown(self):
         # indicate that the thread should be stopped

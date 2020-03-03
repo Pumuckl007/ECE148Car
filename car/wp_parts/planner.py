@@ -34,17 +34,19 @@ class KiwiPlanner():
         self.currLocation = [0, 0]             # current GPS lcoation; initialize at equator
         self.goalLocation = [[x * pi/180 for x in y] for y in goalLocation] # convert from degrees to radians
         self.distance = 100                    # tracks the distance to goal. initialize at 100m
-        
+
         #reduced from 15m to 5m
         self.goalThreshold = 5                # the setpoint threshold for distance to goal [m]
         self.reachGoal = False
         # initialize a text file
         #self.textFile = open('gps_data.txt', 'w')
 
-    def run(self, currLocation, bearing_angle, stop_cmd):
+    def run(self, currLocation, previousLocation):
 
         # update the current location from GPS part
         self.currLocation = currLocation
+
+        bearing = self.calc_bearing(currLocation, prevLocation)
 
         # update the distance to goal
         self.distance = self.update_distance()
@@ -62,11 +64,10 @@ class KiwiPlanner():
         else:
             # calculate steering and throttle as using controller
             # modified by Saurabh - no more prevLocation + uses bearing angle
-            self.steer_cmd = self.steering_controller(currLocation, bearing_angle)
+            self.steer_cmd = self.steering_controller(currLocation, bearing)
             #415 is our driving speed, 405 is our neutral
             #TODO Make these constants easier to find/change
-            self.throttle_cmd = 0 if stop_cmd else 0.5
-            print("Stop Cmd = {}".format(stop_cmd))
+            self.throttle_cmd = 0.5
 
         # print updates
         self.print_process()
@@ -99,7 +100,7 @@ class KiwiPlanner():
         #2pi radians aka 0 rads represents North. bearing angle
         #ranges from 0 to +2pi. 2pi- bearing - pi = negative if
         #we need to turn right, positive if we need to turn left
-        #if we're off by a negative angle, then we compensate by changing 
+        #if we're off by a negative angle, then we compensate by changing
         #in the positive direction, hence the - sign
         #^^this comment is dumb, ignore
         self.bearing = bearingToDest - bearing_angle
