@@ -4,12 +4,14 @@ import ubx
 from NTRIPClient import NTRIPClient
 
 class UBXMidigatorReader:
-    def __init__(self, ser, callback):
+    def __init__(self, ser, callback, updateMethod):
         self.ser = ser
         self.callback = callback
+        self.updateMethod = updateMethod
         self.buffer = b''
 
     def read(self, n=1):
+        self.updateMethod()
         nextChars = self.ser.read(n)
         nextCharsDup = [nextChars[i:i+1] for i in range(len(nextChars))]
         success = False
@@ -24,14 +26,21 @@ class UBXMidigatorReader:
 
 
 class C099F9P:
-    def __init__(self,port='/dev/ttyACM0'):
+    def __init__(self,port='/dev/ttyACM0', ip="rtk2go.com", rtkport=2101, mountpoint="ESCADERA_NTRIP"):
+        self.ntrip = NTRIPClient(ip, rtkport, mountpoint, self.newRTK)
         self.ser = serial.Serial(port=port, baudrate=460800)
-        self.mediator = UBXMidigatorReader(self.ser, self.parseNmea)
+        self.mediator = UBXMidigatorReader(self.ser, self.parseNmea, self.ntrip.querry)
         self.reader = ubx.Reader(self.mediator.read)
+        self.ntrip.getMountPoints()
+        self.ntrip.startStreamingData()
+
+    def newRTK(self, data):
+        print(str(len(data)) + " bytes of rtk read")
+        self.ser.write(data)
 
     def setUpdateRate(self):
         print(ubx.descriptions.cfg_rate)
-        msg = ubx.Message(ubx.descriptions.cfg_rate.description, {'measRate':100, 'navRate':0x01, 'timeRef': 0x01})
+        msg = ubx.Message(ubx.descriptions.cfg_rate.description, {'measRate':1000, 'navRate':0x01, 'timeRef': 0x01})
         s = msg.serialize();
         print(":".join("{:02x}".format(c) for c in s))
         self.ser.write(s)
@@ -70,6 +79,7 @@ class C099F9P:
     def readNmea(self, nmea):
         if not nmea.sentence_type == "GGA":
             return
+        print(str(nmea).replace("GNGGA", "GPGGA"))
         lat = self.convertLatLon(nmea.lat)
         lon = self.convertLatLon(nmea.lon)
         print("at " + str(lat) + nmea.lat_dir + ", " + str(lon) + nmea.lon_dir + " with " + nmea.num_sats + " sats.")
@@ -83,6 +93,9 @@ class C099F9P:
         minorFloat = minorFloat / 60
         print(major + " " + minor)
         return majorFloat + minorFloat
+
+    def newRTCMData(data):
+        print(data)
 
 def lookAtNema(nmea):
     if nmea.sentence_type == "GGA":
