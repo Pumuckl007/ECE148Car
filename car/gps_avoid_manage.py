@@ -14,6 +14,7 @@ import donkeycar as dk
 from wp_parts.rtkgps import RTKGPS
 from wp_parts.planner import KiwiPlanner
 from wp_parts.personFinder import PersonFinder
+from wp_parts.mixer import Mixer
 from donkeycar.vehicle import Vehicle
 from donkeycar.parts.actuator import PCA9685, PWMSteering, PWMThrottle
 from donkeycar.parts.controller import LocalWebController
@@ -45,7 +46,7 @@ def drive(cfg, goalLocation):
     # GPS is a DK part that will poll GPS data from serial port
     # and output current location in radians.
     gps = RTKGPS()
-    personFiner = PersonFinder(steer_gain=0.5, distance_calibration=466)
+    personFinder = PersonFinder(steer_gain=0.5, distance_calibration=466)
 
     # Planner is a DK part that calculates control signals to actuators based on current location
     # from GPS
@@ -53,16 +54,16 @@ def drive(cfg, goalLocation):
                         throttle_gain=cfg.THROTTLE_P_GAIN)
 
     # Actuators: steering and throttle
-    steering_controller = PCA9685(cfg.STEERING_CHANNEL)
+    steering_controller = PCA9685(1, 0x40, busnum=1)
     steering = PWMSteering(controller=steering_controller,
-                                    left_pulse=cfg.STEERING_LEFT_PWM,
-                                    right_pulse=cfg.STEERING_RIGHT_PWM)
+                                    left_pulse=300,
+                                    right_pulse=475)
 
-    throttle_controller = PCA9685(cfg.THROTTLE_CHANNEL)
+    throttle_controller = PCA9685(2, 0x40, busnum=1)
     throttle = PWMThrottle(controller=throttle_controller,
-                                    max_pulse=cfg.THROTTLE_FORWARD_PWM,
-                                    zero_pulse=cfg.THROTTLE_STOPPED_PWM,
-                                    min_pulse=cfg.THROTTLE_REVERSE_PWM)
+                                    max_pulse=460,
+                                    zero_pulse=370,
+                                    min_pulse=330)
 
     mixer = Mixer()
 
@@ -71,7 +72,7 @@ def drive(cfg, goalLocation):
 
     V.add(cam, inputs=[], outputs=['cam/img'], threaded=True)
 
-    V.add(planner, inputs=["cam/img"],
+    V.add(personFinder, inputs=["cam/img"],
             outputs=["steer_cmd_person", "throttle_cmd_person", "proc/img"], threaded=True)
 
     # add threaded part for gps controller
@@ -115,7 +116,7 @@ if __name__ == '__main__':
     #     lng = pos['lng']
     #     lat = pos['lat']
     #     waypoints.append([lng, lat])
-    straight_away = [[32.881017, -117.234106], [32.881018, -117.235807]]
+    straight_away = [[32.881039333333334, -117.233309], [32.881018, -117.235807]]
     right_angle =  [[32.881165, -117.234064],
                   [32.881165, -117.234574],
                   [32.881296, -117.234574],
@@ -125,7 +126,7 @@ if __name__ == '__main__':
                   [32.881271, -117.235471]]
     goalLocation = [[32.8811271,-117.2342783], [32.8812414, -117.2374792]]
     goalLocation = [[32.881322,-117.235454], [32.881162,-117.235459]]
-    waypoints = straight_away[1:2]
+    waypoints = straight_away
     print("Waypoints: {}".format(waypoints))
 
 

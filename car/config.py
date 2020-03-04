@@ -15,6 +15,10 @@ print(cfg.CAMERA_RESOLUTION)
 
 import os
 
+#stuff to make donkey work
+ROI_CROP_TOP = 0
+ROI_CROP_BOTTOM = 0
+
 #PATHS
 CAR_PATH = PACKAGE_PATH = os.path.dirname(os.path.realpath(__file__))
 DATA_PATH = os.path.join(CAR_PATH, 'data')
@@ -43,7 +47,7 @@ THROTTLE_REVERSE_PWM = 270      # PGPS: 270, Kiwi:275
 ################ GPS PROJECT ###################
 #CONTROLLER
 THROTTLE_P_GAIN = 1
-STEERING_P_GAIN = 0.75           # Changing from 0.5 to 0.75
+STEERING_P_GAIN = -0.5           # Changing from 0.5 to 0.75
 
 #GPS SERIAL
 PORT = '/dev/ttyS0'

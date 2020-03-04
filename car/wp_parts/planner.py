@@ -41,12 +41,18 @@ class KiwiPlanner():
         # initialize a text file
         #self.textFile = open('gps_data.txt', 'w')
 
-    def run(self, currLocation, previousLocation):
+    def run(self, currLocation, prevLocation):
 
         # update the current location from GPS part
         self.currLocation = currLocation
 
         bearing = self.calc_bearing(currLocation, prevLocation)
+        bearing = bearing + 3.14
+        if bearing > 3.14:
+            bearing = bearing - 3.14 - 3.14
+        print("cur=" + str(currLocation[0]*180/pi) + ", " + str(currLocation[1]*180/pi) + "," + str(bearing))
+       # print("steeer =" + str(self.steer_cmd))
+#        bearing = self.calc_bearing(currLocation, prevLocation)
 
         # update the distance to goal
         self.distance = self.update_distance()
@@ -65,6 +71,7 @@ class KiwiPlanner():
             # calculate steering and throttle as using controller
             # modified by Saurabh - no more prevLocation + uses bearing angle
             self.steer_cmd = self.steering_controller(currLocation, bearing)
+            #print("steeer =" + str(self.steer_cmd))
             #415 is our driving speed, 405 is our neutral
             #TODO Make these constants easier to find/change
             self.throttle_cmd = 0.5
@@ -78,7 +85,7 @@ class KiwiPlanner():
         # end
         if self.currWaypoint == self.numWaypoints and self.reachGoal == True:
             self.throttle_cmd = 0       # Set to stop when we reach final waypoint.
-            print("Done.")
+            #print("Done.")
 
         return self.steer_cmd, self.throttle_cmd
 
@@ -96,6 +103,7 @@ class KiwiPlanner():
         @return: steering command
         """
         bearingToDest = self.calc_bearing(currLocation, self.goalLocation[self.currWaypoint])
+#        print("Brearing to dest = " + str(bearingToDest))
 
         #2pi radians aka 0 rads represents North. bearing angle
         #ranges from 0 to +2pi. 2pi- bearing - pi = negative if

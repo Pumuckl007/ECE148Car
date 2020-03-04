@@ -39,7 +39,7 @@ class PersonFinder():
         h = abs(yA - yB)
         w = abs(xA - xB)
         dist = 1/h * self.distance_calibration
-        print("Found person " + str(dist) + " meters away")
+ #       print("Found person " + str(dist) + " meters away")
         return dist
 
     def computeAngle(self, xA, yA, xB, yB):
@@ -47,7 +47,7 @@ class PersonFinder():
         xCent = xCent / 2
         xCent = xCent - 200
         angle = xCent * 50/200
-        print("Found person at " + str(angle) + " degreese")
+#        print("Found person at " + str(angle) + " degreese")
         return angle
 
     def drawOnImage(self, img, dist, angle, id=0):
@@ -89,7 +89,7 @@ class PersonFinder():
         id = 1
 
         minDist = 1000
-        self.throttle = self.throttle / 1.1
+        self.throttle = 0.16
         # draw the final bounding boxes
         for (xA, yA, xB, yB) in pick:
             cv2.rectangle(image, (xA, yA), (xB, yB), (0, 255, 0), 2)
@@ -98,13 +98,13 @@ class PersonFinder():
             self.drawOnImage(image, dist, angle)
             if dist < minDist :
                 minDist = dist
-                self.throttle = 0.08
-                self.steering_cmd = -angle / self.steering_max_angle
+                self.throttle = 0.2
+                self.steering_cmd = angle / self.steering_max_angle
 
         image = cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
         imageOut = image.transpose([1, 0, 2])
-        self.out = (self.steering_cmd, 0.08, imageOut)
-        print("Steering at " + str(self.steering_cmd))
+        self.out = (self.steering_cmd, 0.1, imageOut)
+  #      print("Steering at " + str(self.steering_cmd))
 
     def update(self):
         # the function run in it's own thread

@@ -10,7 +10,7 @@ from numpy import pi, cos, sin, arctan2, sqrt, square, radians
 import serial
 import pynmea2
 
-from .rtkgps.gps import C099F9P
+from .librtkgps.gps import C099F9P
 
 
 class RTKGPS():
@@ -20,26 +20,27 @@ class RTKGPS():
         self.prevLocation = [0, 0]
 
         # GPS serial object
-        self.gpsObj = C099F9P()
+        self.gpsObj = C099F9P(ip="", callback=self.newData)
         self.gpsObj.setUpdateRate();
 
         self.on = True  # threading
 
     def poll(self):
+        self.gpsObj.read()
 
+    def newData(self):
         if self.gpsObj.newGGA:
             # update the current location of car
             self.prevLocation = self.currLocation
-            currLocation = self.GPStoRad(self.gpsObj.gga)
+            currLocation = self.gpsObj.latlon
+            currLocation = (currLocation[0] * pi/180, -currLocation[1]*pi/180)
+            #print(self.gpsObj.gga)
+            #print("CANT MISS THIS")
             self.currLocation = currLocation
-            # print(self.currLocation)
-        else:
-            # do nothing; don't need the other serial data
-            pass
-        return
+            self.gpsObj.newGGA = False
 
     def update(self):
-        while self.on:
+        while True:
             self.poll()
 
     def run_threaded(self):

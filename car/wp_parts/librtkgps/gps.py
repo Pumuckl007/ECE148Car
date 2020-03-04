@@ -1,7 +1,7 @@
 import serial
 import pynmea2
 import ubx
-from NTRIPClient import NTRIPClient
+from .NTRIPClient import NTRIPClient
 
 class UBXMidigatorReader:
     def __init__(self, ser, callback, updateMethod):
@@ -23,13 +23,14 @@ class UBXMidigatorReader:
                 self.buffer = self.buffer + char
         return nextChars
 
-def stub:
+def stub():
     nothing = ""
 
 class C099F9P:
-    def __init__(self,port='/dev/ttyACM0', ip="rtk2go.com", rtkport=2101, mountpoint="ESCADERA_NTRIP"):
+    def __init__(self,port='/dev/ttyACM0', ip="rtk2go.com", rtkport=2101, mountpoint="ESCADERA_NTRIP", callback=stub):
         self.ser = serial.Serial(port=port, baudrate=460800)
         self.ip = ip
+        self.callback = callback
         if not ip=="":
             self.ntrip = NTRIPClient(ip, rtkport, mountpoint, self.newRTK)
             self.ntrip.getMountPoints()
@@ -39,6 +40,7 @@ class C099F9P:
             self.mediator = UBXMidigatorReader(self.ser, self.parseNmea, stub)
         self.reader = ubx.Reader(self.mediator.read)
         self.newGGA = False
+        self.latlon = (0.0,0.0)
 
     def newRTK(self, data):
         print(str(len(data)) + " bytes of rtk read")
@@ -46,7 +48,7 @@ class C099F9P:
 
     def setUpdateRate(self):
         print(ubx.descriptions.cfg_rate)
-        msg = ubx.Message(ubx.descriptions.cfg_rate.description, {'measRate':51, 'navRate':0x01, 'timeRef': 0x01})
+        msg = ubx.Message(ubx.descriptions.cfg_rate.description, {'measRate':51, 'navRate':10, 'timeRef': 0x01})
         s = msg.serialize();
         print(":".join("{:02x}".format(c) for c in s))
         self.ser.write(s)
@@ -85,12 +87,15 @@ class C099F9P:
     def readNmea(self, nmea):
         if not nmea.sentence_type == "GGA":
             return
-        print(str(nmea).replace("GNGGA", "GPGGA"))
+        #print(str(nmea).replace("GNGGA", "GPGGA"))
         lat = self.convertLatLon(nmea.lat)
         lon = self.convertLatLon(nmea.lon)
-        # print("at " + str(lat) + nmea.lat_dir + ", " + str(lon) + nmea.lon_dir + " with " + nmea.num_sats + " sats.")
+        self.latlon = (lat,lon)
+        #print("at " + str(lat) + nmea.lat_dir + ", " + str(lon) + nmea.lon_dir + " with " + nmea.num_sats + " sats.")
         self.newGGA = True
+        #print("Setting newGGA")
         self.gga = str(str(nmea).replace("GNGGA", "GPGGA"))
+        self.callback()
         if not self.ip == "":
             self.ntrip.gga = self.gga
 
@@ -101,7 +106,7 @@ class C099F9P:
         majorFloat = float(major)
         minorFloat = float(minor)
         minorFloat = minorFloat / 60
-        print(major + " " + minor)
+        #print(major + " " + minor)
         return majorFloat + minorFloat
 
     def newRTCMData(data):
