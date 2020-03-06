@@ -15,6 +15,7 @@ from wp_parts.rtkgps import RTKGPS
 from wp_parts.planner import KiwiPlanner
 from wp_parts.personFinder import PersonFinder
 from wp_parts.mixer import Mixer
+from wp_parts.gpsheading import GPSHeading
 from donkeycar.vehicle import Vehicle
 from donkeycar.parts.actuator import PCA9685, PWMSteering, PWMThrottle
 from donkeycar.parts.controller import LocalWebController
@@ -47,6 +48,7 @@ def drive(cfg, goalLocation):
     # and output current location in radians.
     gps = RTKGPS()
     personFinder = PersonFinder(steer_gain=0.5, distance_calibration=466)
+    gpsHeading = GPSHeading()
 
     # Planner is a DK part that calculates control signals to actuators based on current location
     # from GPS
@@ -78,13 +80,14 @@ def drive(cfg, goalLocation):
     # add threaded part for gps controller
     # We no longer need the GPS to output previous location
     V.add(gps, outputs=["currLocation", "prevLocation"], threaded=True)
+    V.add(gpsHeading, inputs=["currLocation"], outputs=["heading"])
 
     # add planner, actuator parts
     # Previous location is no longer needed
     # Instead, use actual bearing from DMP
     # It also takes in stop_cmd, a boolean indicating whether to stop
     # in which case it reverts to "STOPPED_PWM"
-    V.add(planner, inputs=["currLocation", "prevLocation"],
+    V.add(planner, inputs=["currLocation", "heading"],
             outputs=["steer_cmd_planner", "throttle_cmd_planner"])
 
     V.add(mixer, inputs=["steer_cmd_person", "steer_cmd_planner"],

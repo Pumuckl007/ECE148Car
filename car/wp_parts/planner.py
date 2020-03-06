@@ -41,12 +41,11 @@ class KiwiPlanner():
         # initialize a text file
         #self.textFile = open('gps_data.txt', 'w')
 
-    def run(self, currLocation, prevLocation):
+    def run(self, currLocation, bearing):
 
         # update the current location from GPS part
         self.currLocation = currLocation
 
-        bearing = self.calc_bearing(currLocation, prevLocation)
         bearing = bearing + 3.14
         if bearing > 3.14:
             bearing = bearing - 3.14 - 3.14
