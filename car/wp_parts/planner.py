@@ -9,12 +9,13 @@ donkeycar part for controlling the car.
 
 from numpy import pi, cos, sin, arctan2, sqrt, square, radians
 import time
+from datetime import datetime
 
 class KiwiPlanner():
     def __init__(self, goalLocation, steer_gain, throttle_gain):
 
         # TODO: calibrate the throttle and steering upper and lower bounds
-
+        self.log = open("bearing.csv", 'a')
         # Throttle controller
         self.throttle_gain = throttle_gain     # TODO: tune P throttle controller
         self.throttle_lower = 0                # calibrate with DK actuator parts inputs
@@ -36,7 +37,7 @@ class KiwiPlanner():
         self.distance = 100                    # tracks the distance to goal. initialize at 100m
 
         #reduced from 15m to 5m
-        self.goalThreshold = 5                # the setpoint threshold for distance to goal [m]
+        self.goalThreshold = 2                # the setpoint threshold for distance to goal [m]
         self.reachGoal = False
         # initialize a text file
         #self.textFile = open('gps_data.txt', 'w')
@@ -46,9 +47,9 @@ class KiwiPlanner():
         # update the current location from GPS part
         self.currLocation = currLocation
 
-        bearing = bearing + 3.14
-        if bearing > 3.14:
-            bearing = bearing - 3.14 - 3.14
+        bearing = (bearing) % (2*pi)
+        #if bearing > 3.14:
+        #    bearing = bearing - 3.14 - 3.14
         print("cur=" + str(currLocation[0]*180/pi) + ", " + str(currLocation[1]*180/pi) + "," + str(bearing))
        # print("steeer =" + str(self.steer_cmd))
 #        bearing = self.calc_bearing(currLocation, prevLocation)
@@ -103,7 +104,6 @@ class KiwiPlanner():
         """
         bearingToDest = self.calc_bearing(currLocation, self.goalLocation[self.currWaypoint])
 #        print("Brearing to dest = " + str(bearingToDest))
-
         #2pi radians aka 0 rads represents North. bearing angle
         #ranges from 0 to +2pi. 2pi- bearing - pi = negative if
         #we need to turn right, positive if we need to turn left
@@ -111,12 +111,13 @@ class KiwiPlanner():
         #in the positive direction, hence the - sign
         #^^this comment is dumb, ignore
         self.bearing = bearingToDest - bearing_angle
+        self.log.write(datetime.now().strftime("%H:%M:%S") + "," + str(self.distance) + "," + str(self.bearing) + "\n")
         print("GPS Goal Bearing: {}".format(bearingToDest))
         print("Current Bearing: {}".format(bearing_angle))
         print("Bearing Error: {}".format(self.bearing))
         #the steerer automatically converts an angle to pwm
         self.steer_cmd = self.steer_gain * self.bearing
-
+        print("Steering comand: {}".format(self.steer_cmd))
         # hard limits
         if self.steering_cmd > self.steering_right:
             self.steering_cmd = self.steering_right
@@ -156,9 +157,9 @@ class KiwiPlanner():
         initialBearing = arctan2(x, y)
 
         # remap from [-pi,pi] to [0, 2*pi] for compass bearing
-        compassBearingRad = (initialBearing + 2*pi) % (2*pi)
+        compassBearingRad = (initialBearing + pi) % (2*pi)
 
-        return initialBearing
+        return compassBearingRad
 
     def dist_between_gps_points(self, pointA, pointB):
         """

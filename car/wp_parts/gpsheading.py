@@ -32,12 +32,15 @@ class GPSHeading():
 
         centroids = self.compute_centroids(self.recentMeasurements)
 
+        #print("centroids " + str(centroids))
+
         bearing = self.calc_bearing(centroids[1], centroids[0])
+        self.previousHeading = bearing
         return bearing
 
     def compute_centroids(self, locations):
         locationCount = len(locations)
-        middleIndex = locationCount / 2
+        middleIndex = int(locationCount / 2)
         oldLocations = locations[:middleIndex]
         newLocations = locations[middleIndex:]
         oldCentroid = self.compute_centroid(oldLocations)

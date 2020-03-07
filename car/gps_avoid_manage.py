@@ -48,7 +48,7 @@ def drive(cfg, goalLocation):
     # and output current location in radians.
     gps = RTKGPS()
     personFinder = PersonFinder(steer_gain=0.5, distance_calibration=466)
-    gpsHeading = GPSHeading()
+    gpsHeading = GPSHeading(2)
 
     # Planner is a DK part that calculates control signals to actuators based on current location
     # from GPS
@@ -58,8 +58,8 @@ def drive(cfg, goalLocation):
     # Actuators: steering and throttle
     steering_controller = PCA9685(1, 0x40, busnum=1)
     steering = PWMSteering(controller=steering_controller,
-                                    left_pulse=300,
-                                    right_pulse=475)
+                                    left_pulse=310,
+                                    right_pulse=465)
 
     throttle_controller = PCA9685(2, 0x40, busnum=1)
     throttle = PWMThrottle(controller=throttle_controller,
@@ -119,7 +119,7 @@ if __name__ == '__main__':
     #     lng = pos['lng']
     #     lat = pos['lat']
     #     waypoints.append([lng, lat])
-    straight_away = [[32.881039333333334, -117.233309], [32.881018, -117.235807]]
+    straight_away = [[32.881105, -117.2333215], [32.881018, -117.235807]]
     right_angle =  [[32.881165, -117.234064],
                   [32.881165, -117.234574],
                   [32.881296, -117.234574],

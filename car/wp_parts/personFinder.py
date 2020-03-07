@@ -27,6 +27,7 @@ class PersonFinder():
         self.bearing = 0                       # current bearing error to goal [rad]
 
         self.distance_calibration = distance_calibration
+        self.center_offset = 3.0
 
         self.hog = cv2.HOGDescriptor()
         self.hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
@@ -90,20 +91,30 @@ class PersonFinder():
 
         minDist = 1000
         self.throttle = 0.16
+        self.steering_cmd = 0
         # draw the final bounding boxes
         for (xA, yA, xB, yB) in pick:
             cv2.rectangle(image, (xA, yA), (xB, yB), (0, 255, 0), 2)
             dist = self.computeDistance(xA, yA, xB, yB)
-            angle = self.computeAngle(xA, yA, xB, yB)
+            angle = self.computeAngle(xA, yA, xB, yB) + self.center_offset
             self.drawOnImage(image, dist, angle)
-            if dist < minDist :
+            if dist < minDist and abs(angle) > 5:
                 minDist = dist
                 self.throttle = 0.2
                 self.steering_cmd = angle / self.steering_max_angle
+            if dist < minDist and abs(angle) < 5:
+                print("in the middle at " + str(angle))
+                minDist = dist
+                self.throttle = 0.2
+                self.steering_cmd = self.steering_max_angle
 
         image = cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
         imageOut = image.transpose([1, 0, 2])
-        self.out = (self.steering_cmd, 0.1, imageOut)
+        if self.steering_cmd > 1:
+            self.steering_cmd = 1
+        if self.steering_cmd < -1:
+            self.steering_cmd = -1
+        self.out = (self.steering_cmd, 0.12, imageOut)
   #      print("Steering at " + str(self.steering_cmd))
 
     def update(self):
