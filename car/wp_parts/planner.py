@@ -74,7 +74,7 @@ class KiwiPlanner():
             #print("steeer =" + str(self.steer_cmd))
             #415 is our driving speed, 405 is our neutral
             #TODO Make these constants easier to find/change
-            self.throttle_cmd = 0.5
+            self.throttle_cmd = max(0.08, min(0.2, self.distance*0.12/10))
 
         # print updates
         self.print_process()

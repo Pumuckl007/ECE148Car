@@ -48,7 +48,7 @@ def drive(cfg, goalLocation):
     # and output current location in radians.
     gps = RTKGPS()
     personFinder = PersonFinder(steer_gain=0.5, distance_calibration=466)
-    gpsHeading = GPSHeading(2)
+    gpsHeading = GPSHeading(3)
 
     # Planner is a DK part that calculates control signals to actuators based on current location
     # from GPS
@@ -90,13 +90,13 @@ def drive(cfg, goalLocation):
     V.add(planner, inputs=["currLocation", "heading"],
             outputs=["steer_cmd_planner", "throttle_cmd_planner"])
 
-    V.add(mixer, inputs=["steer_cmd_person", "steer_cmd_planner"],
-            outputs=["steer_cmd"])
+    V.add(mixer, inputs=["steer_cmd_person", "steer_cmd_planner", "throttle_cmd_person", "throttle_cmd_planner"],
+            outputs=["steer_cmd, throttle_cmd"])
 
     #steer_cmd is a pwm value
     V.add(steering, inputs=['steer_cmd'])
     # throttle takes in a throttle_cmd pwm value,
-    V.add(throttle, inputs=['throttle_cmd_person'])
+    V.add(throttle, inputs=['throttle_cmd'])
 
     V.add(ctr,
           inputs=['proc/img'],
@@ -129,7 +129,10 @@ if __name__ == '__main__':
                   [32.881271, -117.235471]]
     goalLocation = [[32.8811271,-117.2342783], [32.8812414, -117.2374792]]
     goalLocation = [[32.881322,-117.235454], [32.881162,-117.235459]]
-    maxPath = [[32.881025, -117.233962],
+    maxPath = [[32.881056, -117.233963],
+    [32.881045, -117.234312],
+    [32.881029, -117.234560],
+    [32.881074, -117.235144],
     [32.881018, -117.235439],
     [32.881274, -117.235457],
     [32.881302, -117.234552],

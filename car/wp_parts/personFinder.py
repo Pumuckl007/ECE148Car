@@ -89,8 +89,8 @@ class PersonFinder():
         people = []
         id = 1
 
-        minDist = 1000
-        self.throttle = 0.16
+        minDist = 3.0
+        self.throttle = 0.11
         self.steering_cmd = 0
         # draw the final bounding boxes
         for (xA, yA, xB, yB) in pick:
@@ -98,15 +98,17 @@ class PersonFinder():
             dist = self.computeDistance(xA, yA, xB, yB)
             angle = self.computeAngle(xA, yA, xB, yB) + self.center_offset
             self.drawOnImage(image, dist, angle)
+            print("Dist at = " + str(dist))
+            print("######")
             if dist < minDist and abs(angle) > 5:
                 minDist = dist
-                self.throttle = 0.2
+                self.throttle = 0.08
                 self.steering_cmd = angle / self.steering_max_angle
             if dist < minDist and abs(angle) < 5:
                 print("in the middle at " + str(angle))
                 minDist = dist
-                self.throttle = 0.2
-                self.steering_cmd = self.steering_max_angle
+                self.throttle = 0.08
+                self.steering_cmd = 0.2
 
         image = cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
         imageOut = image.transpose([1, 0, 2])
@@ -114,7 +116,7 @@ class PersonFinder():
             self.steering_cmd = 1
         if self.steering_cmd < -1:
             self.steering_cmd = -1
-        self.out = (self.steering_cmd, 0.12, imageOut)
+        self.out = (self.steering_cmd,self.throttle, imageOut)
   #      print("Steering at " + str(self.steering_cmd))
 
     def update(self):

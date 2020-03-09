@@ -9,7 +9,11 @@ donkeycar part for controlling the car.
 
 
 class Mixer():
-    def run(self, steering_person, steering_planner):
+    def run(self, steering_person, steering_planner, person_throttle, planner_throttle):
+        angle = self.computeAngle(steering_person, steering_planner)
+        return angle, min(person_throttle, planner_throttle)
+
+    def computeAngle(self, steering_person, steering_planner):
         print("person = " + str(steering_person) + ", planner = " + str(steering_planner))
         if abs(steering_person) < 0.05:
             if steering_planner > 1:

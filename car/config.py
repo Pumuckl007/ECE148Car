@@ -47,7 +47,7 @@ THROTTLE_REVERSE_PWM = 270      # PGPS: 270, Kiwi:275
 ################ GPS PROJECT ###################
 #CONTROLLER
 THROTTLE_P_GAIN = 1
-STEERING_P_GAIN = 1.0           # Changing from 0.5 to 0.75
+STEERING_P_GAIN = 0.75           # Changing from 0.5 to 0.75
 
 #GPS SERIAL
 PORT = '/dev/ttyS0'
