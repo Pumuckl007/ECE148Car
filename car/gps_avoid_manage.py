@@ -75,7 +75,7 @@ def drive(cfg, goalLocation):
     V.add(cam, inputs=[], outputs=['cam/img'], threaded=True)
 
     V.add(personFinder, inputs=["cam/img"],
-            outputs=["steer_cmd_person", "throttle_cmd_person", "proc/img"], threaded=True)
+            outputs=["steer_cmd_person", "person_throttle", "proc/img"], threaded=True)
 
     # add threaded part for gps controller
     # We no longer need the GPS to output previous location
@@ -88,9 +88,9 @@ def drive(cfg, goalLocation):
     # It also takes in stop_cmd, a boolean indicating whether to stop
     # in which case it reverts to "STOPPED_PWM"
     V.add(planner, inputs=["currLocation", "heading"],
-            outputs=["steer_cmd_planner", "throttle_cmd_planner"])
+            outputs=["steer_cmd_planner", "planner_throttle"])
 
-    V.add(mixer, inputs=["steer_cmd_person", "steer_cmd_planner", "throttle_cmd_person", "throttle_cmd_planner"],
+    V.add(mixer, inputs=["steer_cmd_person", "steer_cmd_planner", "person_throttle", "planner_throttle"],
             outputs=["steer_cmd, throttle_cmd"])
 
     #steer_cmd is a pwm value
