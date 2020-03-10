@@ -91,7 +91,7 @@ def drive(cfg, goalLocation):
             outputs=["steer_cmd_planner", "planner_throttle"])
 
     V.add(mixer, inputs=["steer_cmd_person", "steer_cmd_planner", "person_throttle", "planner_throttle"],
-            outputs=["steer_cmd, throttle_cmd"])
+            outputs=["steer_cmd", "throttle_cmd"])
 
     #steer_cmd is a pwm value
     V.add(steering, inputs=['steer_cmd'])

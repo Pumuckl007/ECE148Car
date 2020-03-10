@@ -37,7 +37,7 @@ class KiwiPlanner():
         self.distance = 100                    # tracks the distance to goal. initialize at 100m
 
         #reduced from 15m to 5m
-        self.goalThreshold = 2                # the setpoint threshold for distance to goal [m]
+        self.goalThreshold = 2.5                # the setpoint threshold for distance to goal [m]
         self.reachGoal = False
         # initialize a text file
         #self.textFile = open('gps_data.txt', 'w')
@@ -75,6 +75,8 @@ class KiwiPlanner():
             #415 is our driving speed, 405 is our neutral
             #TODO Make these constants easier to find/change
             self.throttle_cmd = max(0.08, min(0.2, self.distance*0.12/10))
+            steerDoubleGain = min(1, max(2, 5/self.distance))
+            self.steer_cmd = self.steer_cmd*steerDoubleGain
 
         # print updates
         self.print_process()
