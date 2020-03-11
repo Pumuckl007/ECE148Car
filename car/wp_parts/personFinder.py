@@ -90,7 +90,7 @@ class PersonFinder():
         id = 1
 
         minDist = 3.0
-        self.throttle = 0.11
+        self.throttle = 0.2
         self.steering_cmd = 0
         # draw the final bounding boxes
         for (xA, yA, xB, yB) in pick:

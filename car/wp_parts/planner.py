@@ -12,7 +12,7 @@ import time
 from datetime import datetime
 
 class KiwiPlanner():
-    def __init__(self, goalLocation, steer_gain, throttle_gain):
+    def __init__(self, goalLocation, steer_gain, throttle_gain, speedPID):
 
         # TODO: calibrate the throttle and steering upper and lower bounds
         self.log = open("bearing.csv", 'a')
@@ -39,6 +39,7 @@ class KiwiPlanner():
         #reduced from 15m to 5m
         self.goalThreshold = 2.5                # the setpoint threshold for distance to goal [m]
         self.reachGoal = False
+        self.speedPID = speedPID
         # initialize a text file
         #self.textFile = open('gps_data.txt', 'w')
 
@@ -71,10 +72,10 @@ class KiwiPlanner():
             # calculate steering and throttle as using controller
             # modified by Saurabh - no more prevLocation + uses bearing angle
             self.steer_cmd = self.steering_controller(currLocation, bearing)
-            #print("steeer =" + str(self.steer_cmd))
-            #415 is our driving speed, 405 is our neutral
-            #TODO Make these constants easier to find/change
-            self.throttle_cmd = max(0.08, min(0.2, self.distance*0.12/10))
+
+            #sets the wanted speed in m/s
+            wantedSpeed = max(0.2, min(1.0, self.distance*/10.0))
+            self.speedPID.set(wantedSpeed)
             steerDoubleGain = min(1, max(2, 5/self.distance))
             self.steer_cmd = self.steer_cmd*steerDoubleGain
 
@@ -86,10 +87,10 @@ class KiwiPlanner():
 
         # end
         if self.currWaypoint == self.numWaypoints and self.reachGoal == True:
-            self.throttle_cmd = 0       # Set to stop when we reach final waypoint.
+            return self.steer_cmd, 0
             #print("Done.")
 
-        return self.steer_cmd, self.throttle_cmd
+        return self.steer_cmd, self.speedPID.getOutput()
 
     def shutdown(self):
         return

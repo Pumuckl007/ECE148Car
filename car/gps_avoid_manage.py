@@ -44,6 +44,8 @@ def drive(cfg, goalLocation):
 
     ctr = LocalWebController()
 
+    speedPID = PIDController(p=0.7, i=0, d=0, f=0.6)
+
     # GPS is a DK part that will poll GPS data from serial port
     # and output current location in radians.
     gps = RTKGPS()
