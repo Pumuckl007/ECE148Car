@@ -80,7 +80,7 @@ class KiwiPlanner():
             self.steer_cmd = self.steering_controller(currLocation, bearing)
 
             #sets the wanted speed in m/s
-            wantedSpeed = max(0.2, min(1.0, self.distance*/10.0))
+            wantedSpeed = max(0.2, min(1.0, self.distance*1/10.0))
             self.speedPID.set(wantedSpeed)
             steerDoubleGain = min(1, max(2, 5/self.distance))
             self.steer_cmd = self.steer_cmd*steerDoubleGain
@@ -136,7 +136,7 @@ class KiwiPlanner():
 
         return self.steer_cmd
 
-    def find_next_lookahead(slef, currLocation):
+    def find_next_lookahead(self, currLocation):
         distToLookahead = self.dist_between_gps_points(self.lookahead, self.currLocation)
         if self.currWaypoint < 1:
             self.lookahead = self.goalLocation[self.currWaypoint]
