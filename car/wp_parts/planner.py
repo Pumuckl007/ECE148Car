@@ -4,7 +4,7 @@
 planner.py
 donkeycar part for controlling the car.
 
-@authors: Jason Mayeda, Sidney Hsu, Roy Sun, Matthew Gilli
+@authors: Max Apodaca, Jason Mayeda, Sidney Hsu, Roy Sun, Matthew Gilli
 """
 
 from numpy import pi, cos, sin, arctan2, sqrt, square, radians
@@ -42,6 +42,9 @@ class KiwiPlanner():
         self.speedPID = speedPID
         # initialize a text file
         #self.textFile = open('gps_data.txt', 'w')
+        self.lookahead = self.goalLocation[0]
+        self.lookaheadDistance = 3
+        self.lookaheadMoveDist = 1
 
     def run(self, currLocation, bearing):
 
@@ -67,6 +70,9 @@ class KiwiPlanner():
             self.reachGoal = False
             self.currWaypoint += 1
             self.distance = 100  # reset distance to an arbitrary distance
+            if self.currWaypoint < self.numWaypoints:
+                self.lookahead = self.goalLocation[self.currWaypoint - 1]
+                self.find_next_lookahead()
 
         else:
             # calculate steering and throttle as using controller
@@ -105,7 +111,8 @@ class KiwiPlanner():
         @params: bearing_angle - the angle from the current position to the next waypoint
         @return: steering command
         """
-        bearingToDest = self.calc_bearing(currLocation, self.goalLocation[self.currWaypoint])
+        self.find_next_lookahead(currLocation)
+        bearingToDest = self.calc_bearing(currLocation, self.lookahead)
 #        print("Brearing to dest = " + str(bearingToDest))
         #2pi radians aka 0 rads represents North. bearing angle
         #ranges from 0 to +2pi. 2pi- bearing - pi = negative if
@@ -128,6 +135,28 @@ class KiwiPlanner():
             self.steering_cmd = self.steering_left
 
         return self.steer_cmd
+
+    def find_next_lookahead(slef, currLocation):
+        distToLookahead = self.dist_between_gps_points(self.lookahead, self.currLocation)
+        if self.currWaypoint < 1:
+            self.lookahead = self.goalLocation[self.currWaypoint]
+            return
+
+        if (distToLookahead > self.lookaheadDistance) and not (self.lookahead == (0,0)) :
+            return
+
+        prevWaypoint = self.goalLocation[self.currWaypoint]
+        nextWaypoint = self.goalLocation[self.currWaypoint - 1]
+        dLat = nextWaypoint[0] - prevWaypoint[0]
+        dLon = nextWaypoint[1] - prevWaypoint[1]
+        distBetweenWaypoints = self.dist_between_gps_points(prevWaypoint, nextWaypoint)
+        propotionOfLengthToMove = self.lookaheadMoveDist/distBetweenWaypoints
+        newLat = self.lookahead[0] + dLat * propotionOfLengthToMove
+        newLon = self.lookahead[1] + dLon * propotionOfLengthToMove
+        self.lookahead = [newLat, newLon]
+        lookaheadDistFromPrev = self.dist_between_gps_points(self.lookahead, prevWaypoint)
+        if lookaheadDistFromPrev > distBetweenWaypoints :
+            self.lookahead = nextWaypoint
 
     def update_distance(self):
         """
