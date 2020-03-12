@@ -80,7 +80,11 @@ class KiwiPlanner():
             self.steer_cmd = self.steering_controller(currLocation, bearing)
 
             #sets the wanted speed in m/s
+<<<<<<< HEAD
             wantedSpeed = max(0.5, min(1.0, self.distance*1/10.0))
+=======
+            wantedSpeed = max(0.2, min(1.0, self.distance*1/10.0))
+>>>>>>> master
             self.speedPID.set(wantedSpeed)
             steerDoubleGain = min(1, max(2, 5/self.distance))
             self.steer_cmd = self.steer_cmd*steerDoubleGain

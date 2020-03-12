@@ -20,7 +20,10 @@ class PIDController():
         self.compute()
 
     def compute(self):
+<<<<<<< HEAD
         print("Setting at " + str(self.setting) + " actual " + str(self.lastData))
+=======
+>>>>>>> master
         fOutput = self.setting * self.f
         pOutput = (self.setting - self.lastData) * self.p
         iOutput = self.acc * self.i
