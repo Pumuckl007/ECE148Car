@@ -27,7 +27,7 @@ def stub():
     nothing = ""
 
 class C099F9P:
-    def __init__(self,port='/dev/ttyACM0', ip="rtk2go.com", rtkport=2101, mountpoint="ESCADERA_NTRIP", callback=stub):
+    def __init__(self,port='/dev/ttyACM1', ip="rtk2go.com", rtkport=2101, mountpoint="ESCADERA_NTRIP", callback=stub):
         self.ser = serial.Serial(port=port, baudrate=460800)
         self.ip = ip
         self.callback = callback
@@ -48,7 +48,7 @@ class C099F9P:
 
     def setUpdateRate(self):
         print(ubx.descriptions.cfg_rate)
-        msg = ubx.Message(ubx.descriptions.cfg_rate.description, {'measRate':51, 'navRate':10, 'timeRef': 0x01})
+        msg = ubx.Message(ubx.descriptions.cfg_rate.description, {'measRate':51, 'navRate':3, 'timeRef': 0x01})
         s = msg.serialize();
         print(":".join("{:02x}".format(c) for c in s))
         self.ser.write(s)

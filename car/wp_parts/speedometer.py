@@ -9,9 +9,10 @@ donkeycar part for calculating speed from GPS data
 
 from numpy import pi, cos, sin, arctan2, sqrt, square, radians
 import time
+from datetime import datetime
 
 class Speedometer():
-    def __init__(self, speedPID, positionWindow = 3, updatePeriod=0.05):
+    def __init__(self, speedPID, positionWindow = 3, updatePeriod=0.153):
         self.recentMeasurements = []
         self.prevLocation = (0,0)
         self.previousSpeed = 0
@@ -41,6 +42,7 @@ class Speedometer():
         speed = distance / time
         self.previousSpeed = speed
         self.speedPID.sample(speed)
+        print("######## Speed = " + str(speed) + " " + datetime.now().strftime("%H:%M:%S"))
         return speed
 
     def compute_centroids(self, locations):

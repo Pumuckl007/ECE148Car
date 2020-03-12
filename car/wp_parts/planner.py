@@ -72,7 +72,7 @@ class KiwiPlanner():
             self.distance = 100  # reset distance to an arbitrary distance
             if self.currWaypoint < self.numWaypoints:
                 self.lookahead = self.goalLocation[self.currWaypoint - 1]
-                self.find_next_lookahead()
+                self.find_next_lookahead(currLocation)
 
         else:
             # calculate steering and throttle as using controller
@@ -80,7 +80,7 @@ class KiwiPlanner():
             self.steer_cmd = self.steering_controller(currLocation, bearing)
 
             #sets the wanted speed in m/s
-            wantedSpeed = max(0.2, min(1.0, self.distance*/10.0))
+            wantedSpeed = max(0.5, min(1.0, self.distance*1/10.0))
             self.speedPID.set(wantedSpeed)
             steerDoubleGain = min(1, max(2, 5/self.distance))
             self.steer_cmd = self.steer_cmd*steerDoubleGain
@@ -136,7 +136,7 @@ class KiwiPlanner():
 
         return self.steer_cmd
 
-    def find_next_lookahead(slef, currLocation):
+    def find_next_lookahead(self, currLocation):
         distToLookahead = self.dist_between_gps_points(self.lookahead, self.currLocation)
         if self.currWaypoint < 1:
             self.lookahead = self.goalLocation[self.currWaypoint]
@@ -145,8 +145,8 @@ class KiwiPlanner():
         if (distToLookahead > self.lookaheadDistance) and not (self.lookahead == (0,0)) :
             return
 
-        prevWaypoint = self.goalLocation[self.currWaypoint]
-        nextWaypoint = self.goalLocation[self.currWaypoint - 1]
+        prevWaypoint = self.goalLocation[self.currWaypoint - 1]
+        nextWaypoint = self.goalLocation[self.currWaypoint]
         dLat = nextWaypoint[0] - prevWaypoint[0]
         dLon = nextWaypoint[1] - prevWaypoint[1]
         distBetweenWaypoints = self.dist_between_gps_points(prevWaypoint, nextWaypoint)
@@ -231,7 +231,7 @@ class KiwiPlanner():
         """
         #print("Goal wait counter: %d" % self.goalWaitCounter)
         print("Current waypoint: %d" % self.currWaypoint)
-        print(self.goalLocation[self.currWaypoint])
+        print(self.lookahead)
         print(self.reachGoal)
         # print("Current location: [%1.8f, %1.8f]" % (self.currLocation[0], self.currLocation[1]))
         # print("Previous location: [%1.8f, %1.8f]" % (self.prevLocation[0], self.prevLocation[1]))
