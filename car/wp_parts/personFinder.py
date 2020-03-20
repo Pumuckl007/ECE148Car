@@ -90,7 +90,7 @@ class PersonFinder():
         id = 1
 
         minDist = 3.0
-        self.throttle = 0.2
+        self.throttle = 0.16
         self.steering_cmd = 0
         # draw the final bounding boxes
         for (xA, yA, xB, yB) in pick:
@@ -110,6 +110,7 @@ class PersonFinder():
                 self.throttle = 0.08
                 self.steering_cmd = 0.2
 
+        self.steering_cmd = self.steering_cmd * 1.5
         image = cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
         imageOut = image.transpose([1, 0, 2])
         if self.steering_cmd > 1:

@@ -9,24 +9,27 @@ class PIDController():
         self.lastData = 0
         self.setting = 0
         self.delta = 0
+        self.dt = 1
 
     def sample(self, data, dt=1):
+        self.dt = dt
         self.acc = self.acc * 0.9
         self.acc = self.acc + data*0.1
         self.delta = data - self.lastData
         self.lastData = data
         self.compute()
 
-    def compute():
+    def compute(self):
+        print("Setting at " + str(self.setting) + " actual " + str(self.lastData))
         fOutput = self.setting * self.f
         pOutput = (self.setting - self.lastData) * self.p
         iOutput = self.acc * self.i
-        dOutput = self.delta * self.d / dt
+        dOutput = self.delta * self.d / self.dt
         self.output = fOutput + pOutput + iOutput + dOutput
 
-    def getOutput():
+    def getOutput(self):
         return self.output
 
-    def set(setting):
+    def set(self, setting):
         self.setting = setting
         self.compute()

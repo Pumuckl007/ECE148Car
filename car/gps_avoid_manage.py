@@ -16,6 +16,8 @@ from wp_parts.planner import KiwiPlanner
 from wp_parts.personFinder import PersonFinder
 from wp_parts.mixer import Mixer
 from wp_parts.gpsheading import GPSHeading
+from wp_parts.pidcontroller import PIDController
+from wp_parts.speedometer import Speedometer
 from donkeycar.vehicle import Vehicle
 from donkeycar.parts.actuator import PCA9685, PWMSteering, PWMThrottle
 from donkeycar.parts.controller import LocalWebController
@@ -44,18 +46,19 @@ def drive(cfg, goalLocation):
 
     ctr = LocalWebController()
 
-    speedPID = PIDController(p=0.7, i=0, d=0, f=0.6)
+    speedPID = PIDController(p=0.03, i=0, d=0, f=0.13)
 
     # GPS is a DK part that will poll GPS data from serial port
     # and output current location in radians.
     gps = RTKGPS()
     personFinder = PersonFinder(steer_gain=0.5, distance_calibration=466)
     gpsHeading = GPSHeading(3)
+    gpsSpeed = Speedometer(speedPID)
 
     # Planner is a DK part that calculates control signals to actuators based on current location
     # from GPS
     planner = KiwiPlanner(goalLocation=goalLocation, steer_gain=cfg.STEERING_P_GAIN,
-                        throttle_gain=cfg.THROTTLE_P_GAIN)
+                        throttle_gain=cfg.THROTTLE_P_GAIN, speedPID=speedPID)
 
     # Actuators: steering and throttle
     steering_controller = PCA9685(1, 0x40, busnum=1)
@@ -83,6 +86,7 @@ def drive(cfg, goalLocation):
     # We no longer need the GPS to output previous location
     V.add(gps, outputs=["currLocation", "prevLocation"], threaded=True)
     V.add(gpsHeading, inputs=["currLocation"], outputs=["heading"])
+    V.add(gpsSpeed, inputs=["currLocation"], outputs=["speed"])
 
     # add planner, actuator parts
     # Previous location is no longer needed
